@@ -1,7 +1,8 @@
 # LingBotgame — 蚂蚁灵波具身大模型挑战赛
 
 基于 **LingBot-VLA 2.0 (6B)** 在 **RoboTwin 2.0**（Aloha-AgileX，50 任务）上做 post-training 调优。
-技术方案、赛程、规则红线见 `docs/plan.md`；赛题规则原文 `docs/work.md`；官方 Q&A `docs/Dingnews.md`。
+技术方案、赛程、规则红线见 `docs/plan.md`；赛题规则原文 `docs/work.md`；赛事群答复整理见 `docs/Dingnews.md`。
+两人协作先看 [开发分工与日程](docs/双人开发计划.md) 和 [Git 协作规则](CONTRIBUTING.md)。
 
 ## 仓库布局
 
@@ -27,11 +28,10 @@ bash scripts/download_model.sh    # 2) 下载 6B 权重（默认 ModelScope，�
 bash scripts/download_data.sh     # 3) 下载 50 任务 clean 数据并解压（默认 hf-mirror）
 ```
 
-Windows 队友用 Git Bash 执行即可。网络不通先开代理或看脚本头部的镜像说明。
+梁家诚可在 Windows 上用 Git Bash 执行。网络不通先开代理或看脚本头部的镜像说明。
 
 ## 协作约定
 
-- `main` 保持可复现；实验开分支：`exp/<主题>-<日期>`（如 `exp/lr-scan-0930`）
-- 每组实验在 `docs/experiments/` 下留一条记录（配置、成绩、结论），commit message 写清对应实验
-- 评测口径：正式成绩用 **FP32** 推理（官方复测口径）；BF16 只用于流程验证
-- 赛题红线（违规出局，详见 docs/plan.md）：不用 randomized/外部数据训练、不做 RL/rollout 造数据、不做任务路由/ensemble/多 seed 投票、最终只交一份合并后的全量权重
+- `main` 保持可复现；实验开分支并通过 PR 由另一位队员复核，提交格式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+- 每组有意义的实验在 `docs/experiments/` 下留记录（配置、成绩、结论）。
+- 评测口径和赛题红线以天池赛题、官方模板及最新赛事答复为准；关键参数写入实验记录和最终 README。

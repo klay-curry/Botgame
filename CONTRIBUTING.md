@@ -1,6 +1,6 @@
 # 两人 Git 协作规则
 
-本仓库由刘勇泽和梁家诚共同开发。`main` 只保留可复现的代码、配置和文档；实验过程使用独立分支。具体分工与赛程见 [双人开发计划](docs/双人开发计划.md)。
+本仓库由刘勇泽和梁家诚共同开发。`main` 只保留可复现的代码、配置和文档；实验过程使用独立分支。整体方向与节奏见 [plan.md](docs/plan.md)，技术模块分工见 [modules/README.md](docs/modules/README.md)。
 
 ## 1. 分支与合并
 
@@ -19,7 +19,7 @@ git pull --ff-only
 git switch -c feat/data-audit
 
 # 完成一个可验证的小改动后，只暂存本次修改的文件
-git add src/data/audit.py configs/data_clean.yaml
+git add scripts/data_audit.py configs/data_clean.yaml
 git diff --cached --stat
 git diff --cached --check
 git commit -m "feat(data): validate 50 clean tasks"

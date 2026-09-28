@@ -1,0 +1,40 @@
+# ===== 大文件：不入库，用 scripts/ 下的脚本重新拉取 =====
+# RoboTwin 数据（zips + 解压结果，~40GB+）
+data/
+# 模型权重（6B 全量 ~25GB）
+model/
+# 训练产物
+output/
+outputs/
+runs/
+wandb/
+checkpoints/
+# 通配权重/数据大文件，防止误提交
+*.safetensors
+*.pth
+*.pt
+*.ckpt
+*.hdf5
+*.zip
+*.mp4
+!docs/必读_模板和目录要求.zip
+
+# ===== 外部官方仓库（scripts/setup_repos.sh 克隆，不直接入库）=====
+lingbot-vla-v2/
+RoboTwin/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# ===== 其他 =====
+.cache/
+.DS_Store
+._*
+__MACOSX/
+Thumbs.db
+*.log

@@ -1,6 +1,6 @@
 # evaluation 评测基建
 
-> 对应总览表 #1（docs/modules/README.md §1）｜负责人: 梁家诚主建、刘勇泽定格式 ｜状态: 未启动
+> 对应总览表 #1（docs/modules/README.md §1）｜负责人: 梁家诚主建、刘勇泽定格式 ｜状态: JSON 结构校验已完成，其余未启动
 
 ## 这个模块主要干什么
 
@@ -16,6 +16,15 @@
 2. **吞吐测量脚本**：单 episode 耗时 × 并行 slot → 推算全量评测天数。**硬规则：推算 >4.5 天 → 加卡或提前冻结候选**（这条写进总览表备注）；
 3. **results.json 生成/校验工具**：从原始日志自动汇总 attempts/successes，带逐任务缺失检查——杜绝手填成绩（CONTRIBUTING 红线）；
 4. **开环评测批处理**：一个目录的 checkpoint 全部自动评测 + 汇总排序表，是 training-recipe 模块 checkpoint 扫描的直接依赖（两模块的接口）。
+
+已增加 `scripts/validate_results.py`：按官方模板检查 team ID、两个 setting 的 50 个任务、整数次数和成功次数范围；正式模式要求每任务恰好 100 次，`--draft` 允许阶段性不足 100 次。示例：
+
+```bash
+python scripts/validate_results.py 01_评测结果/results.json
+python scripts/validate_results.py 01_评测结果/results.json --draft
+```
+
+这个工具只校验 JSON 结构和数值关系，**不能证明数字来自真实评测日志**；日志到 JSON 的自动汇总与交叉核对仍由评测调度工作完成。
 
 ## 涉及文件（负责人补全）
 

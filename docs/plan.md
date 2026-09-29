@@ -18,13 +18,13 @@
 
 | 资源 | 状态 |
 |---|---|
-| 指定模型权重 lingbot-vla-v2-6b | ✅ 已下载 `model/models/Robbyant--lingbot-vla-v2-6b/`（含 depth、dino_video 辅助模块） |
-| 官方代码 | https://github.com/robbyant/lingbot-vla-v2 （训练 + 开环评测 + RoboTwin 闭环评测全家桶，基于 VeOmni） |
-| 训练数据 | HF `TianxingChen/RoboTwin2.0`，只需下 `aloha-agilex_clean_50` 子集（勿下全量 1.53TB） |
+| 指定模型权重 lingbot-vla-v2-6b | 刘勇泽 Mac 本地已下载至仓库外 `../models/lingbot-vla-v2-6b/`，六个 safetensors 分片存在；云端加载尚未验证 |
+| 官方代码来源 | https://github.com/robbyant/lingbot-vla-v2 （训练 + 开环评测 + RoboTwin 闭环评测全家桶，基于 VeOmni） |
+| 训练数据来源 | HF `TianxingChen/RoboTwin2.0`，只需下 `aloha-agilex_clean_50` 子集（勿下全量 1.53TB） |
 | 赛题规则 / 群 Q&A | `docs/work.md` / `docs/Dingnews.md` |
-| 官方代码 | ✅ 已克隆：`lingbot-vla-v2/`（训练+评测）、`RoboTwin/`（仿真环境） |
-| 训练数据 | ✅ 已下载并解压到 `data/robotwin2.0/dataset/<task>/aloha-agilex_clean_50/`，50 任务 × 50 条 = 2500 条 hdf5 齐全 |
-| 本机 | RTX 4060 Laptop 8GB → 只够代码开发、数据转换调度、远程管理；**训练与评测全部上云** |
+| 官方代码状态 | `ours/` 副本已入库，但数据模块、RoboTwin 训练配置和闭环评测目录缺失；当前 checkout 没有 `lingbot-vla-v2/`、`RoboTwin/` 原始参照仓库 |
+| 训练数据状态 | **下载中**（2026-09-29）：`data/robotwin2.0/` 有 9 个结构完整 ZIP、8 个未完成分片、33 个仅有 LFS 指针的任务；现有 2500 个 HDF5 文件名对应的仍是指针。见 `scripts/data_audit.py` 报告 |
+| 本机 | 刘勇泽 Mac、梁家诚 Windows 用于开发和远程管理；**正式训练与评测在 Linux 云环境进行** |
 | 云算力 | 选项 A：赛事官方 AMD 算力（免费，ROCm + MPLib 评测链路，成绩合法）；选项 B：租 NVIDIA 卡（AutoDL 等，4090/A100/H20/H100）。官方训练配方基于单节点 8×H20 |
 
 ## 2. 分阶段计划（4 周）

@@ -38,3 +38,13 @@ venv/
 __MACOSX/
 Thumbs.db
 *.log
+
+# ===== 密钥与凭据（绝不入仓；轮换指引见 docs/security/secret-rotation.md）=====
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+credentials.json
+secrets.yaml

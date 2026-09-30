@@ -16,8 +16,16 @@ set -euo pipefail
 BASE=${BASE:-/root/autodl-tmp}
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-command -v modelscope >/dev/null 2>&1 || { echo "缺 modelscope CLI: pip install -U modelscope"; exit 1; }
-command -v unzip >/dev/null 2>&1 || { echo "缺 unzip: apt install -y unzip"; exit 1; }
+# --- 0. 自举：缺什么装什么（PyPI 走清华源） ---
+PY="$(command -v python || command -v python3 || true)"
+[ -n "$PY" ] || { echo "没有 python/python3"; exit 1; }
+if ! command -v modelscope >/dev/null 2>&1; then
+  echo "安装 modelscope CLI..."
+  pip install -U modelscope -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    || pip3 install -U modelscope -i https://pypi.tuna.tsinghua.edu.cn/simple
+fi
+command -v unzip >/dev/null 2>&1 || { echo "缺 unzip: sudo apt install -y unzip"; exit 1; }
+mkdir -p "$BASE/uploads" "$BASE/robotwin_eef_clean50" "$BASE/assets_dl" "$BASE/depth_models"
 ms() { modelscope download "$@"; }
 
 echo "== [1/6] 环境离线包 env-kit（~850MB） =="
@@ -57,10 +65,9 @@ mkdir -p "$RTROOT/assets"
   [ -d embodiments ]        || unzip -q -n "$ASSETS_DL/embodiments.zip" -x "__MACOSX/*"
 )
 # MoGe 深度权重（训练配置 moge_path 指向）
-mkdir -p "$BASE/depth_models"
 cp -n "$ASSETS_DL/moge2-vitb-normal.pt" "$BASE/depth_models/" 2>/dev/null || true
 # 官方提供的 embodiment 路径配置脚本
-( cd "$RTROOT" && python scripts/update_embodiment_config_path.py ) \
+( cd "$RTROOT" && "$PY" scripts/update_embodiment_config_path.py ) \
   || echo "[WARN] update_embodiment_config_path.py 未跑成功，装好环境后手动执行"
 
 echo "== [5/6] 权重（官方 ModelScope 仓库直拉） =="
@@ -79,18 +86,20 @@ fi
 echo "== [6/6] 完成。磁盘占用: =="
 df -h "$BASE" | tail -1
 
-cat <<'EOF'
+# 按显卡架构自动决定评测安装是否加 --blackwell（sm_120 及以上需要）
+CC="$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | cut -d. -f1 || true)"
+BW=""
+if [ -n "$CC" ] && [ "$CC" -ge 12 ] 2>/dev/null; then
+  BW=" --blackwell"
+  echo "检测到 Blackwell 显卡 (compute_cap=$CC)：评测安装将自动追加 --blackwell"
+fi
 
----------- 资源就绪。接下来安装两套环境（代码在本仓库里） ----------
-# 训练环境（conda py3.12；Ampere~Hopper 卡直接跑）
-conda create -n lingbotvla python=3.12 -y && conda activate lingbotvla
-bash "$BASE/uploads/train/create_train_env_offline.sh" --kit "$BASE/uploads"
-
-# 评测环境（conda py3.10）
-conda create -n RoboTwin python=3.10 -y && conda activate RoboTwin
-bash "$BASE/uploads/sim/install_sim_offline.sh" --kit "$BASE/uploads" \
-     --robotwin "$BASE/uploads/sim/RoboTwin"
-#   Blackwell 卡（RTX PRO 6000 / 5090）在上面命令追加 --blackwell
-
-# 提示: 评测装完先验证 Vulkan:  vulkaninfo --summary | grep -A2 "GPU id"
-EOF
+echo
+echo "---------- 资源就绪。接下来安装两套环境（逐行复制执行） ----------"
+echo "conda create -n lingbotvla python=3.12 -y && conda activate lingbotvla"
+echo "bash \"$BASE/uploads/train/create_train_env_offline.sh\" --kit \"$BASE/uploads\""
+echo
+echo "conda create -n RoboTwin python=3.10 -y && conda activate RoboTwin"
+echo "bash \"$BASE/uploads/sim/install_sim_offline.sh\" --kit \"$BASE/uploads\" --robotwin \"$BASE/uploads/sim/RoboTwin\"$BW"
+echo
+echo "# 提示: 评测装完先验证 Vulkan:  vulkaninfo --summary | grep -A2 'GPU id'"

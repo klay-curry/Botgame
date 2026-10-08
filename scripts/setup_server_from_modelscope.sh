@@ -41,17 +41,17 @@ echo "== [2/6] 解包训练仓库快照与 RoboTwin 快照 =="
 [ -d "$ENVKIT/sim/RoboTwin/scripts" ]           || ( cd "$ENVKIT/sim"   && tar xzf RoboTwin-team-20260930.tar.gz )
 RTROOT="$ENVKIT/sim/RoboTwin"
 
-echo "== [3/6] 训练数据 LeRobot eef_clean_50（~35GB，50 任务×50 条，含 WAN2.2 latents） =="
-DS="$BASE/robotwin_eef_clean50"
-if [ ! -d "$DS/lerobot_robotwin_eef_clean_50/adjust_bottle-demo_clean_collect_200-50/meta" ]; then
-  ms --dataset currytom/robotwin-lerobot-eef-clean50 --local_dir "$DS"
-  LEROBOT_DIR="$DS/lerobot_robotwin_eef_clean_50"
-  mkdir -p "$LEROBOT_DIR"
-  for f in "$LEROBOT_DIR"/*.tar; do tar xf "$f" -C "$LEROBOT_DIR"; done
+echo "== [3/6] 训练数据 LeRobot v2.1 官方关节版（2.4GB，50 任务×50 条=2500 eps，14 维关节） =="
+# 注意: 必须用 14 维关节版（官方管线口径: config 切片/norm_stats/评测 take_action qpos 全按 14 关节）。
+# robbyant 的 eef 版是 16 维末端位姿空间, 与官方管线不兼容, 勿用于训练。
+DS="$BASE/robotwin_lerobot_v21"
+if [ ! -d "$DS/RoboTwin_lerobot_v21/meta" ]; then
+  ms --dataset currytom/robotwin-lerobot-joint-v21 --local_dir "$DS"
+  ( cd "$DS" && unzip -q -n RoboTwin_lerobot_v21.zip )
 fi
-n=$(find "$DS/lerobot_robotwin_eef_clean_50" -mindepth 1 -maxdepth 1 -type d | wc -l)
-echo "  解包得到任务目录: $n（应为 50）"
-[ "$n" = "50" ] || { echo "任务数不对，检查下载完整性"; exit 1; }
+n=$(find "$DS/RoboTwin_lerobot_v21/data" -name "*.parquet" 2>/dev/null | wc -l)
+echo "  数据集 parquet 数: $n（应为 2500）"
+[ "$n" = "2500" ] || { echo "任务数不对，检查下载完整性"; exit 1; }
 
 echo "== [4/6] 仿真资产（~14.8GB）解压到 RoboTwin/assets =="
 ASSETS_DL="$BASE/assets_dl"

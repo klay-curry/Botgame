@@ -10,8 +10,6 @@
 #   bash scripts/setup_server_from_modelscope.sh                  # 全量拉取+解包
 #   SKIP_ENV=1 bash ...                                           # 环境包已拉过，跳过
 #   WITH_BASELINE=1 bash ...                                      # 附加官方 baseline ckpt（25.5G，currytom/self）
-#   WITH_CKPT=1 bash ...                                          # 附加自训 joint-v21 ckpt（默认 step6000，12G）
-#   WITH_CKPT=1 WITH_CKPT_STEP=2000 bash ...                      #   换拉别的步数（2000/4000/6000）
 #   BASE=/root/autodl-tmp bash ...                                # 自定义根目录（默认 /root/autodl-tmp）
 #   ⚠️ AMD(ROCm) 机器: 环境安装段不适用（离线包是 CUDA 版 torch），见 docs/ROCM_SETUP.md
 set -euo pipefail
@@ -102,13 +100,8 @@ if [ "${WITH_BASELINE:-0}" = "1" ]; then
   echo "== [extra] 官方 robotwin baseline ckpt（25.5G，currytom/self，对照评测用） =="
   ms --dataset currytom/self --include "model-*.safetensors" --local_dir "$BASE/baseline_ckpt"
 fi
-
-if [ "${WITH_CKPT:-0}" = "1" ]; then
-  echo "== [extra] 自训 joint-v21 ckpt（12G/个，currytom/lingbotvla-joint-v21-ckpt） =="
-  # 默认拉 step6000（当前最优，开环 MAE 0.0248）；WITH_CKPT=2000/4000 可拉别的
-  STEP=${WITH_CKPT_STEP:-6000}
-  ms --model currytom/lingbotvla-joint-v21-ckpt --include "global_step_${STEP}/**" --local_dir "$BASE/joint_ckpt"
-fi
+# 自训 joint-v21 ckpt（step2000/4000/6000，各 12G）不上 ModelScope；
+# 换机时用 autodl-fs / 移动硬盘等带外方式拷贝，或经团队确认后再传。
 
 echo "== [6/6] 完成。磁盘占用: =="
 df -h "$BASE" | tail -1

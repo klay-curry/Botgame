@@ -1,0 +1,1 @@
+robotwin /root/autodl-tmp/robotwin_joint_v21/RoboTwin_lerobot_v21

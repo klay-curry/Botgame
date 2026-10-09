@@ -10,7 +10,10 @@
 #   bash scripts/setup_server_from_modelscope.sh                  # 全量拉取+解包
 #   SKIP_ENV=1 bash ...                                           # 环境包已拉过，跳过
 #   WITH_BASELINE=1 bash ...                                      # 附加官方 baseline ckpt（25.5G，currytom/self）
+#   WITH_CKPT=1 bash ...                                          # 附加自训 joint-v21 ckpt（默认 step6000，12G）
+#   WITH_CKPT=1 WITH_CKPT_STEP=2000 bash ...                      #   换拉别的步数（2000/4000/6000）
 #   BASE=/root/autodl-tmp bash ...                                # 自定义根目录（默认 /root/autodl-tmp）
+#   ⚠️ AMD(ROCm) 机器: 环境安装段不适用（离线包是 CUDA 版 torch），见 docs/ROCM_SETUP.md
 set -euo pipefail
 
 BASE=${BASE:-/root/autodl-tmp}
@@ -25,7 +28,7 @@ if ! command -v modelscope >/dev/null 2>&1; then
     || pip3 install -U modelscope -i https://pypi.tuna.tsinghua.edu.cn/simple
 fi
 command -v unzip >/dev/null 2>&1 || { echo "缺 unzip: sudo apt install -y unzip"; exit 1; }
-mkdir -p "$BASE/uploads" "$BASE/robotwin_eef_clean50" "$BASE/assets_dl" "$BASE/depth_models"
+mkdir -p "$BASE/uploads" "$BASE/robotwin_eef_clean50" "$BASE/robotwin_joint_v21" "$BASE/assets_dl" "$BASE/depth_models"
 ms() { modelscope download "$@"; }
 
 echo "== [1/6] 环境离线包 env-kit（~850MB） =="
@@ -34,20 +37,37 @@ mkdir -p "$ENVKIT"
 if [ "${SKIP_ENV:-0}" != "1" ]; then
   ms --dataset currytom/robotwin-env-kit --local_dir "$ENVKIT"
 fi
-[ -f "$ENVKIT/train/ours-20260930.tar.gz" ] || { echo "env-kit 不完整（缺 train/ours-*.tar.gz）"; exit 1; }
+# 2026-10-09 快照优先（含 joint 数据配置 + 闭环评测补件），旧机兼容回退 20260930
+OURS_TGZ=$(ls "$ENVKIT"/train/ours-20261009.tar.gz "$ENVKIT"/train/ours-20260930.tar.gz 2>/dev/null | head -1)
+RT_TGZ=$(ls "$ENVKIT"/sim/RoboTwin-team-20261009.tar.gz "$ENVKIT"/sim/RoboTwin-team-20260930.tar.gz 2>/dev/null | head -1)
+[ -n "$OURS_TGZ" ] || { echo "env-kit 不完整（缺 train/ours-*.tar.gz）"; exit 1; }
+[ -n "$RT_TGZ" ]   || { echo "env-kit 不完整（缺 sim/RoboTwin-team-*.tar.gz）"; exit 1; }
 
 echo "== [2/6] 解包训练仓库快照与 RoboTwin 快照 =="
-[ -d "$ENVKIT/train/ours-20260930/lingbotvla" ] || ( cd "$ENVKIT/train" && tar xzf ours-20260930.tar.gz )
-[ -d "$ENVKIT/sim/RoboTwin/scripts" ]           || ( cd "$ENVKIT/sim"   && tar xzf RoboTwin-team-20260930.tar.gz )
+# 注意：tarball 内顶层目录名保持 ours-20260930/（路径兼容，勿改）
+[ -d "$ENVKIT/train/ours-20260930/lingbotvla" ] || ( cd "$ENVKIT/train" && tar xzf "$(basename "$OURS_TGZ")" )
+[ -d "$ENVKIT/sim/RoboTwin/scripts" ]           || ( cd "$ENVKIT/sim"   && tar xzf "$(basename "$RT_TGZ")" )
 RTROOT="$ENVKIT/sim/RoboTwin"
+# 闭环评测客户端用相对路径 ../task_config，做软链（旧包没有这条）
+[ -e "$RTROOT/task_config" ] || ln -s "$RTROOT/env_cfg/task_config" "$RTROOT/task_config"
 
-echo "== [3/6] 训练数据 LeRobot v2.1 官方关节版（2.4GB，50 任务×50 条=2500 eps，14 维关节） =="
+echo "== [3/6] 训练数据 LeRobot 官方关节版 joint-v21（14 维关节，2500 eps） =="
 # 注意: 必须用 14 维关节版（官方管线口径: config 切片/norm_stats/评测 take_action qpos 全按 14 关节）。
 # robbyant 的 eef 版是 16 维末端位姿空间, 与官方管线不兼容, 勿用于训练。
-DS="$BASE/robotwin_lerobot_v21"
+# 数据落盘路径须与 ours/assets/training_data/robotwin_joint.txt 一致: $BASE/robotwin_joint_v21/RoboTwin_lerobot_v21
+DS="$BASE/robotwin_joint_v21"
 if [ ! -d "$DS/RoboTwin_lerobot_v21/meta" ]; then
-  ms --dataset currytom/robotwin-lerobot-joint-v21 --local_dir "$DS"
-  ( cd "$DS" && unzip -q -n RoboTwin_lerobot_v21.zip )
+  if ms --dataset currytom/robotwin-lerobot-joint-v21 --include "RoboTwin_lerobot_v21_v30.tar.gz" --local_dir "$DS" \
+     && [ -f "$DS/RoboTwin_lerobot_v21_v30.tar.gz" ]; then
+    echo "  拉到已转好的 v3.0 包，直接解压（免本地转换）"
+    tar xzf "$DS/RoboTwin_lerobot_v21_v30.tar.gz" -C "$DS"
+  else
+    echo "  v3.0 包不可用，回退 v2.1 zip 自行转换"
+    ms --dataset currytom/robotwin-lerobot-joint-v21 --include "RoboTwin_lerobot_v21.zip" --local_dir "$DS"
+    ( cd "$DS" && unzip -q -n RoboTwin_lerobot_v21.zip )
+    echo "  TODO: 装好 lerobot 后执行转换:"
+    echo "    HF_LEROBOT_HOME=$DS $PY -m lerobot.datasets.v30.convert_dataset_v21_to_v30 --repo-id RoboTwin_lerobot_v21 --force-conversion"
+  fi
 fi
 n=$(find "$DS/RoboTwin_lerobot_v21/data" -name "*.parquet" 2>/dev/null | wc -l)
 echo "  数据集 parquet 数: $n（应为 2500）"
@@ -83,6 +103,13 @@ if [ "${WITH_BASELINE:-0}" = "1" ]; then
   ms --dataset currytom/self --include "model-*.safetensors" --local_dir "$BASE/baseline_ckpt"
 fi
 
+if [ "${WITH_CKPT:-0}" = "1" ]; then
+  echo "== [extra] 自训 joint-v21 ckpt（12G/个，currytom/lingbotvla-joint-v21-ckpt） =="
+  # 默认拉 step6000（当前最优，开环 MAE 0.0248）；WITH_CKPT=2000/4000 可拉别的
+  STEP=${WITH_CKPT_STEP:-6000}
+  ms --model currytom/lingbotvla-joint-v21-ckpt --include "global_step_${STEP}/**" --local_dir "$BASE/joint_ckpt"
+fi
+
 echo "== [6/6] 完成。磁盘占用: =="
 df -h "$BASE" | tail -1
 
@@ -96,6 +123,8 @@ fi
 
 echo
 echo "---------- 资源就绪。接下来安装两套环境（逐行复制执行） ----------"
+echo "# ⚠️ AMD(ROCm) 机器: 下面离线包装的是 CUDA 版 torch/flash-attn，不可用；"
+echo "#    手动装 ROCm 版 torch 并跳过 flash-attn（走 SDPA 回退），步骤见 docs/ROCM_SETUP.md"
 echo "conda create -n lingbotvla python=3.12 -y && conda activate lingbotvla"
 echo "bash \"$BASE/uploads/train/create_train_env_offline.sh\" --kit \"$BASE/uploads\""
 echo

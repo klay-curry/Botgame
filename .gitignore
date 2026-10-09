@@ -1,14 +1,15 @@
 # ===== 大文件：不入库，用 scripts/ 下的脚本重新拉取 =====
+# （以下目录模式均锚定仓库根，避免误伤 ours/lingbotvla/data、MoGe 的 model/ 等代码目录）
 # RoboTwin 数据（zips + 解压结果，~40GB+）
-data/
+/data/
 # 模型权重（6B 全量 ~25GB）
-model/
+/model/
 # 训练产物
-output/
-outputs/
-runs/
-wandb/
-checkpoints/
+/output/
+/outputs/
+/runs/
+/wandb/
+/checkpoints/
 # 通配权重/数据大文件，防止误提交
 *.safetensors
 *.pth

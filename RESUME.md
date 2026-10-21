@@ -145,3 +145,10 @@
 - **⚠️ 仿真仓库 09:58 事件受损清单与修复(2026-18)**:与 uploads/train 同一时刻,仿真仓(sim,现 autodl-fs/uploads_sim/RoboTwin)被删了:script/ 只剩 2 件、envs/ 54 个 py 全失、policy/LingBot-VLA-v2 整目录失、assets/objects/objaverse/list.json 失、envs/curobo/src(curobo editable 安装源)失。修复来源叠加:Botgame/RoboTwin(script/)+/tmp/rt_old(envs)+官方 objects.zip(currytom/robotwin-assets,list.json 等 10070 文件)+curobo-v0.7.8.zip(envs/curobo)+自建 websocket glue(policy/LingBot-VLA-v2,按 pi0 模板,get_model 占位客户端不调用)。**用官方仓 robotwin-Platform/robotwin(已可直连 github)做校验基准**。修复后 18:38 闭环筛正常起跑。
 - **📋 迁移交接(10-18 晚)**:用户准备克隆实例迁评测。交接文档=HANDOVER_MIGRATION.md(本机/fs/ModelScope radeon 仓三处)。本机 demo_clean 50任务 bf16 评测 19:35 起跑(~01:00 出);randomized 由克隆机群接手;bf16 A/B 已过(0.03565 vs 0.0350)。
 - **训练后待办**:开环筛 8000/10000(或直接对比 AMD 6600)→ 闭环 smoke;`ckpt6000-eval-guide.md` 的筛选流程照用
+
+## 🟢 2026-10-21 上午:提交材料已推送到 GitHub
+- **提交材料位置**:仓库 `docs/submission/2026-10-21/`(results.json + 逐任务审计表 + 复现与调优说明 + 代码材料 README + 双模式 train.sh/eval.sh + 资源拉取脚本 + 结果动图脚本);**已推送 main**(`7e4fcaa..54f5b44`),本地 zip `/root/autodl-tmp/RoboTwin初赛提交材料.zip`
+- **结果动图**:`docs/submission/2026-10-21/01_评测结果/eval_results_animation.gif` + `eval_results_summary.png`,由 `scripts/make_results_gif.py` 从 results.json 生成(不需要 GPU)
+- **回放视频**:主 launcher 新增 `--video` 开关(默认关闭以提速),`bash eval.sh --tasks 1 --gpus 1 --per-gpu 1 --video` 可录单任务 rollout mp4(需 GPU)
+- **待办**:① 填团队名(results.json 的 team_id / 报告"团队名称"仍是占位符);② GPU 恢复后做 FP32 抽样复测(官方复测口径),10 任务×100 局约 8-10h
+- ⚠️ **凭据提醒**:GitHub PAT 与 Kaggle key 曾在对话中明文出现,已用于本次推送后**必须轮换**(GitHub PAT 建议在 Settings → Developer settings 里 revoke 旧的再发新的)

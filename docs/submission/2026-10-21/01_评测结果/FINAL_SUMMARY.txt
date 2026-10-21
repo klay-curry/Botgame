@@ -1,0 +1,72 @@
+
+############ 最终提交成绩汇总 (equiv10000) ############
+生成时间: 2026-10-21 02:39:37
+
+===== demo_clean (50任务 x 100局) =====
+  Result: 50 done, 0 skipped
+Summary: total 32117s, success 2829/5000, overall rate 56.6%
+All tasks fully executed 100 episodes
+
+===== demo_randomized (50任务 x 100局) =====
+============================================
+  RoboTwin demo_randomized 合并总表 (equiv10000, 100 episodes/task)
+  合并时间: 2026-10-21 02:39:35
+============================================
+Task                       Success    Rate        
+------------------------------------------------------------
+shake_bottle               84/100      84.0%
+shake_bottle_horizontally  83/100      83.0%
+adjust_bottle              81/100      81.0%
+grab_roller                81/100      81.0%
+place_container_plate      78/100      78.0%
+press_stapler              70/100      70.0%
+place_burger_fries         65/100      65.0%
+stack_bowls_two            65/100      65.0%
+click_bell                 56/100      56.0%
+place_shoe                 52/100      52.0%
+place_empty_cup            50/100      50.0%
+dump_bin_bigbin            45/100      45.0%
+place_object_stand         45/100      45.0%
+open_laptop                40/100      40.0%
+place_bread_basket         40/100      40.0%
+stack_bowls_three          40/100      40.0%
+place_object_basket        39/100      39.0%
+open_microwave             37/100      37.0%
+turn_switch                37/100      37.0%
+blocks_ranking_rgb         36/100      36.0%
+click_alarmclock           35/100      35.0%
+beat_block_hammer          33/100      33.0%
+stack_blocks_two           33/100      33.0%
+place_a2b_left             31/100      31.0%
+place_phone_stand          31/100      31.0%
+scan_object                29/100      29.0%
+handover_mic               28/100      28.0%
+place_a2b_right            28/100      28.0%
+pick_dual_bottles          22/100      22.0%
+put_object_cabinet         22/100      22.0%
+place_can_basket           21/100      21.0%
+move_playingcard_away      20/100      20.0%
+place_dual_shoes           19/100      19.0%
+place_bread_skillet        18/100      18.0%
+pick_diverse_bottles       17/100      17.0%
+place_object_scale         15/100      15.0%
+place_cans_plasticbox      14/100      14.0%
+blocks_ranking_size        12/100      12.0%
+rotate_qrcode              12/100      12.0%
+handover_block             11/100      11.0%
+hanging_mug                11/100      11.0%
+move_stapler_pad           11/100      11.0%
+move_pillbottle_pad        10/100      10.0%
+place_fan                  10/100      10.0%
+move_can_pot               9/100      9.0%
+put_bottles_dustbin        8/100      8.0%
+place_mouse_pad            7/100      7.0%
+lift_pot                   6/100      6.0%
+stamp_seal                 6/100      6.0%
+stack_blocks_three         2/100      2.0%
+------------------------------------------------------------
+覆盖任务数: 50/50
+总计: 1655/5000 = 33.1%
+============================================================
+
+===================================================

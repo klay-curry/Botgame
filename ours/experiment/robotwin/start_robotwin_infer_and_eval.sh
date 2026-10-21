@@ -22,6 +22,7 @@
 #   --robo_name         robot config name (default: robotwin)
 #   --video_fps         video recording fps (default: 10)
 #   --no_video          disable video recording to speed up simulation
+#   --video             enable video recording (rollout mp4 per episode, slower)
 #   --use_bf16          use bfloat16 inference (default: False)
 #   --use_fp32          use float32 inference (default: True; release reproduction setting)
 #   --use_compile       enable model compile in policy inference (default: True)
@@ -82,6 +83,7 @@ while [[ $# -gt 0 ]]; do
         --task_config)       task_config="$2";       shift 2 ;;
         --video_fps)         video_fps="$2";         shift 2 ;;
         --no_video)          enable_video=False;     shift ;;
+        --video)             enable_video=True;      shift ;;
         --keep_inference)    keep_inference=true;    shift ;;
         --inference_env)     inference_env="$2";     shift 2 ;;
         --sim_env)           sim_env="$2";           shift 2 ;;
@@ -110,6 +112,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --keep_inference    keep inference servers resident after simulation"
             echo "  --video_fps         video recording fps (default: 10)"
             echo "  --no_video          disable video recording to speed up simulation"
+            echo "  --video             enable video recording (rollout mp4, slower)"
             exit 0 ;;
         *)
             echo -e "\033[31mUnknown argument: $1\033[0m"; exit 1 ;;

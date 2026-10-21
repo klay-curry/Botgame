@@ -1,5 +1,24 @@
 # 训练进行中状态(2026-10-02 16:07 启动) → ✅ 训练已完成,评测诊断见下方 10-08 节
 
+## ✅ 2026-10-21 02:39:最终提交评测全部完成(equiv10000,50任务×100局×2setting)
+- **最终成绩**:**demo_clean 56.6%(2829/5000)**、**demo_randomized 33.1%(1655/5000)**,两个 setting 均为 50任务×100局全量,0 跳过
+- 结果文件:`output/eval/_0k_demo_clean_20261020_113351/stats.txt`(clean)、`output/eval/randomized_merged_stats.txt` + `output/eval/FINAL_SUMMARY.txt`(randomized 及双口径汇总)
+- **对比结论(20任务同口径筛选)**:equiv10000 52.5% vs amd6600 19.2% → **提交权重 = `hf_ckpt_final_equiv10000`**(本地 `models_radeon/hf_ckpt_final_equiv10000` + fs 备份 `ckpt_radeon_final_fs/`),对冲候选 7600/8600 未使用
+- **降幅规律(randomized 相对 clean)**:整体 -23.5pt;抓取/倾倒类降幅小(adjust_bottle -9、shake_bottle -15、stack_bowls_two -8),**依赖视觉定位/物体辨认的任务降幅大**(stack_blocks_two -40、click_alarmclock -32、blocks_ranking_rgb -31、rotate_qrcode -57、scan_object -42)——瓶颈在视觉鲁棒性而非动作精度,后续改进方向明确
+- **最难任务(两个 setting 均低)**:stack_blocks_three 4%/2%、lift_pot 48%/6%、stamp_seal 29%/6%、place_mouse_pad 21%/7%、put_bottles_dustbin 19%/8%
+- **评测速度(本机6×4090-48G,12槽)**:clean 5000局 8.9h;randomized 5000局 7.3h(约 11-13 局/分,失败局打满400步是主因)
+- 详见下方 10-20 节(分片/救援/踩坑记录)
+
+## 🟢 2026-10-20:克隆机(6×4090-48G)最终提交评测进行中——20任务对比已定局:10000 压倒性占优
+- **本机为迁移克隆机**:6×RTX4090(48G)/208核/1TB。原机 10-18 19:35 的"16槽bf16 50任务clean"**从未跑成**(推理服务全灭于 `assert not (use_bf16 and use_fp32)`,本次查旧日志实锤),勿再引用该轮
+- **修复三处才跑通**:① run_eval_smoke.sh 补 `--use_fp32 false`(bf16 时必须显式关,断言见 deploy/lingbot_vla_v2_policy.py:200);② 48G 卡 bf16 只能 **2副本/卡**(3副本前向激活叠加必 OOM),定为 6卡×2=12槽;③ 评测客户端 `test_num` 被前人临时改 30,已还原 **100(协议口径)**,两处副本(仿真仓 script/ + ours/experiment/robotwin/)都改了
+- **实测吞吐**:12槽 100条口径 ≈ 16.6-19 条episode/分钟(约 42s/条),50任务全量 ≈ 5h+长尾;对比原机8槽口径 ~3× 提速
+- **✅ 20任务 demo_clean 对比(30条/任务筛选口径,同口径公平)**:**equiv10000 315/600=52.5% vs amd6600 115/600=19.2%**,2.7倍,与开环MAE(-38%)方向一致 → **提交权重定为 equiv10000**,对冲候选(7600/8600)不再需要。run 目录:10000=`output/eval/_0k_demo_clean_20261020_093216`,6600=`_102327`
+- **进行中**:① equiv10000 全50任务 **clean**(run `_0k_demo_clean_20261020_113351`,48/50完成累计57.4%;16:59 清理误杀2个收尾服务,2分钟内在原端口9340/9341手动拉起救援服务,launcher自动重试成功,两任务从头重跑100条,预计~20:15出stats);② **randomized 已分片提前开跑**(GPU0-3先空闲):A组=GPU0-3×8槽36任务(run `_0k_demo_randomized_20261020_170237`,脚本 run_rand_A.sh,含最难的put_bottles_dustbin),B组=GPU4-5×4槽14任务(watcher `/tmp/watcher_rand_B.sh` 等clean结束自动启动,脚本 run_rand_B.sh,launcher分片副本 _A/_B.sh,B含gpu_id+4偏移与9350端口)。**两组结果需手工合并出总表**;预计 ~00:30 双口径齐
+- **⚠️ 本次新增教训**:①launcher 的分片=复制 launcher 脚本改 task_list_all 数组(交接文档§2.2口径);②清进程时 pattern 切忌全局匹配 lingbot_vla_v2_policy/eval_policy_client——会误伤其他 run 的服务,教训:救援=在同端口同参数手动重启 `python -m deploy.lingbot_vla_v2_policy`,客户端7分钟超时窗口内接上即无损;③wrapper 里 TASK_CONFIG 必须 export,否则静默回落 demo_clean(靠 run 目录名发现)
+- **经验**:launcher 的槽位自适应关停(任务少于服务数时 [release] 空闲槽服务)是正常收尾现象,勿误判为服务崩溃;单任务episode串行无法多卡加速,长尾的根治=episode分片调度(客户端需加seed偏移,未实现,待需要时再做)
+
+
 ## 🟢 2026-10-08 14:50 更新:重训=baseline,夜间流水线已自动化(队友离线,当前由 ZCode+用户推进)
 - **定位**:本次 9000 步重训 = **消融基线 baseline**(用户确认,不必训到完美,接近收敛即可横向对比)
 - **进度**:Step 2045/9000 @14:46,VLA_Loss 0.32→0.037,5.68s/步;日志 `/tmp/train_joint.log`
@@ -105,3 +124,24 @@
 - 数据 v2.1→v3.0 转换 50/50(latents 完整);系统盘治理(95%→5%);缓存重定向数据盘
 - 模型/数据/评测链路全部实测;磁盘守护;七组性能基准
 - 注意:模型是 3 卡(之前 1 卡),torchrun 自动识别 NPROC_PER_NODE=3
+
+## 🟢 2026-10-18:AMD(Radeon)侧交接完成,官方 joint_v30 数据上从 6600 热启动续训到 10000 步(进行中)
+- **AMD 侧交付**(全部在 ModelScope,账号 currytom,交接文档 `lingbotvla-robotwin-radeon-ckpt` 仓库内 `HANDOVER.md`):
+  - 权重:`lingbotvla-robotwin-radeon-ckpt`(hf_ckpt_step1000..6000 + 6100..6600 共 12 个,各 12.75GB;6600 为最后)
+  - 数据:`robotwin-lerobot-official-joint-v30`(官方 demo_clean 转 v3.0,50 任务/2500eps/**549,787 帧**)+ 原始 hdf5 `robotwin2-demo-clean-official`
+  - 代码/日志/验证证据在 `lingbotvla-robotwin-radeon-ckpt` 的 `code/`、`logs/`;AMD 侧训练配方 = 官方 AdamW + global256 + 双教师 full + image_augment,6000 步后又低 LR(5e-5)续到 6600
+- **帧数问题定论**:本地 v21(548,893 帧)与官方 v30 差 894 帧(15 任务约 40 条不同 rollout,1.6%)→ 本轮起改用官方 v30
+- **本机续训配置**(run_train_radeon_cont4gpu.sh,与用户确认):起点 hf_ckpt_step6600 热启动(6600 本体在 autodl-fs:/autodl-fs/data/radeon_ckpt,软链 /root/autodl-tmp/models_radeon/);**AdamW + lr 5e-5 恒定(warmup 1%)+ image_augment=true + 双教师**(对齐 AMD 配方);**4 卡 × micro 24 = global 96**(用户确认 global 不必与 AMD 的 256 一致);**max_steps=3400(计数器口径=离 6600 的步数,3400 即用户目标"等效 10000 步"; 热启动无 DCP 训练器状态,计数器只能从 0 数)**,save_steps=1000(存 1000/2000/3000/3400-最终);**实测 3.09s/步,全程 ~3h**
+- **⚠️ 4 卡 SIGKILL 之谜已解**:4 卡 × num_workers24 = 96 个 dataloader 进程 + 每 rank 默认 64 个 inductor 编译线程,把容器内存(480GB cgroup)顶爆,连续 3 次在首步跨卡聚合时 rank3 被内核 SIGKILL(无 Python 报错、cgroup oom_kill 计数为 0,是 memory.high 压力);workers 降到 8 + TORCHINDUCTOR_COMPILE_THREADS=8 后稳定(容器内存 125GB)。**3 卡(5.6s/步)从未受影响;以后开 4 卡必须带这两个护栏**
+- **数据/磁盘治理(今日)**:删除 eef_clean50(35G)/v21(6.7G)/旧 ckpt 2000/4000/6000(36G,fs 冷存与 ModelScope 均有备份);RoboTwin 仿真环境、Qwen3-VL-4B tokenizer、hf_ckpt_step6600 移 autodl-fs 并软链回原路径;数据盘可用 5.8G→99G
+- **norm stats**:v30 重算 `ours/assets/norm_stats/robotwin_joint_v30.json`(count=549787),robot 配置已切;v21 json 保留可回滚
+- **坑:editable 安装死链** lingbotvla pip editable 原指向被清空的 uploads/train/ours-20260930 → 已建软链指回 Botgame/ours(两路径同仓)
+- **⚠️ 14:24 事故与抢救**:strip 守护 v2 用 mtime 判"最新",但冷存守护 14:23:38 删除 global_step_2000/hf_ckpt 时把 2000 目录 mtime 顶新,strip 守护 14:24:53 误判正在写入的 step3000 为"非最新",删掉写了一半的 optimizer → DCP 崩溃。**已修(v3:只用"存在 hf_ckpt"作完成标记 + 5 分钟新写入保护)**;step3000 的 model 段(24G)完好,已用 /root/autodl-tmp/convert_dcp_to_hf.py 离线转 HF(hf_ckpt_step3000_equiv,等效 9600 步),15:43 起热启动补训最后 400 步(max_steps=400,save 200/400),~16:10 出最终"等效 10000 步"权重。1000/2000 冷存已验证可用(等效 7600/8600)。
+- **✅ 16:40 训练完成**:其后 step400 的 HF 转换两次死于"存档周期峰值 84G > 盘余量"(先本地盘后 fs 满),但 DCP 三段均完整;用 convert_dcp_to_hf.py 转出最终权重:
+  - **等效 10000 步最终权重**:本地 `/root/autodl-tmp/models_radeon/hf_ckpt_final_equiv10000`(12G,15 文件已校验),fs 备份 `/autodl-fs/data/ckpt_radeon_final_fs/hf_ckpt_final_equiv10000`
+  - 等效 7600/8600 冷存在 `/autodl-fs/data/ckpt_cold_radeon_cont/global_step_{1000,2000}`;fs 上 step400 的 model 段(24G)保留,optimizer 已清
+  - **经验:一次 DCP+HF 存档峰值 ~84G,本地盘扣常驻 ~71G 后只够单次存档;长训要么 OUTPUT_DIR 放 fs,要么 save_steps≥2000 并确保存档间守护完成清理**
+- **磁盘守护**:strip_optimizer_v3.sh(修复 mtime 竞态) + ckpt_cold_manager_v2.sh(冷存目录 /autodl-fs/data/ckpt_cold_radeon_cont);当前无训练在跑,守护已停
+- **⚠️ 仿真仓库 09:58 事件受损清单与修复(2026-18)**:与 uploads/train 同一时刻,仿真仓(sim,现 autodl-fs/uploads_sim/RoboTwin)被删了:script/ 只剩 2 件、envs/ 54 个 py 全失、policy/LingBot-VLA-v2 整目录失、assets/objects/objaverse/list.json 失、envs/curobo/src(curobo editable 安装源)失。修复来源叠加:Botgame/RoboTwin(script/)+/tmp/rt_old(envs)+官方 objects.zip(currytom/robotwin-assets,list.json 等 10070 文件)+curobo-v0.7.8.zip(envs/curobo)+自建 websocket glue(policy/LingBot-VLA-v2,按 pi0 模板,get_model 占位客户端不调用)。**用官方仓 robotwin-Platform/robotwin(已可直连 github)做校验基准**。修复后 18:38 闭环筛正常起跑。
+- **📋 迁移交接(10-18 晚)**:用户准备克隆实例迁评测。交接文档=HANDOVER_MIGRATION.md(本机/fs/ModelScope radeon 仓三处)。本机 demo_clean 50任务 bf16 评测 19:35 起跑(~01:00 出);randomized 由克隆机群接手;bf16 A/B 已过(0.03565 vs 0.0350)。
+- **训练后待办**:开环筛 8000/10000(或直接对比 AMD 6600)→ 闭环 smoke;`ckpt6000-eval-guide.md` 的筛选流程照用

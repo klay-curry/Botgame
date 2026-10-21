@@ -1,0 +1,68 @@
+============================================
+  Eval Result Stats
+  Time: 2026-10-20 20:29:08
+  Model: _0k
+  Model path: /root/autodl-tmp/ol_staging/equiv10000/m/a/b/ckpt
+  Tasks: 50
+  Task Config: demo_clean
+  Inference: 6 GPU x 2/GPU = 12 slots
+  Precision: use_bf16=true, use_fp32=false, use_compile=True
+  Result: 50 done, 0 skipped
+============================================
+
+Task                           Time(s)    Done(100)    Success/Total Rate      
+--------------------------------------------------------------------------------
+click_bell                     1985       YES          67/100     67.0%     
+adjust_bottle                  2291       YES          90/100     90.0%     
+beat_block_hammer              2752       YES          49/100     49.0%     
+place_shoe                     2972       YES          68/100     68.0%     
+lift_pot                       3749       YES          48/100     48.0%     
+scan_object                    4416       YES          71/100     71.0%     
+click_alarmclock               1874       YES          67/100     67.0%     
+grab_roller                    1153       YES          98/100     98.0%     
+dump_bin_bigbin                2857       YES          86/100     86.0%     
+handover_block                 6230       YES          17/100     17.0%     
+move_playingcard_away          1433       YES          93/100     93.0%     
+stack_bowls_three              7598       YES          52/100     52.0%     
+hanging_mug                    7623       YES          24/100     24.0%     
+blocks_ranking_rgb             5698       YES          67/100     67.0%     
+handover_mic                   3869       YES          80/100     80.0%     
+open_microwave                 8330       YES          52/100     52.0%     
+move_pillbottle_pad            3658       YES          34/100     34.0%     
+put_object_cabinet             8615       YES          38/100     38.0%     
+stack_blocks_three             8771       YES          4/100      4.0%      
+move_can_pot                   4200       YES          11/100     11.0%     
+place_container_plate          1604       YES          94/100     94.0%     
+place_empty_cup                2005       YES          93/100     93.0%     
+blocks_ranking_size            7422       YES          33/100     33.0%     
+place_object_stand             1875       YES          79/100     79.0%     
+place_object_scale             2536       YES          51/100     51.0%     
+place_fan                      3413       YES          20/100     20.0%     
+place_phone_stand              2330       YES          57/100     57.0%     
+place_mouse_pad                2906       YES          21/100     21.0%     
+move_stapler_pad               3172       YES          12/100     12.0%     
+place_dual_shoes               4916       YES          48/100     48.0%     
+open_laptop                    3859       YES          64/100     64.0%     
+place_a2b_left                 2526       YES          49/100     49.0%     
+pick_dual_bottles              3413       YES          37/100     37.0%     
+pick_diverse_bottles           3638       YES          36/100     36.0%     
+place_object_basket            5132       YES          75/100     75.0%     
+place_a2b_right                2536       YES          51/100     51.0%     
+press_stapler                  1243       YES          99/100     99.0%     
+place_cans_plasticbox          8049       YES          20/100     20.0%     
+place_bread_skillet            3253       YES          64/100     64.0%     
+place_burger_fries             3213       YES          89/100     89.0%     
+shake_bottle                   1493       YES          99/100     99.0%     
+shake_bottle_horizontally      1674       YES          95/100     95.0%     
+place_bread_basket             3789       YES          66/100     66.0%     
+rotate_qrcode                  2170       YES          69/100     69.0%     
+turn_switch                    2126       YES          59/100     59.0%     
+stamp_seal                     2892       YES          29/100     29.0%     
+stack_blocks_two               3519       YES          73/100     73.0%     
+stack_bowls_two                4060       YES          73/100     73.0%     
+place_can_basket               7944       YES          39/100     39.0%     
+put_bottles_dustbin            12706      YES          19/100     19.0%     
+--------------------------------------------------------------------------------
+Summary: total 32117s, success 2829/5000, overall rate 56.6%
+All tasks fully executed 100 episodes
+============================================

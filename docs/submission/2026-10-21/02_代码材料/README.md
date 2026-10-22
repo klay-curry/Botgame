@@ -109,8 +109,7 @@ bash setup_sim_repo.sh                        # 克隆官方 RoboTwin@13c3c47 + 
     │   └── deploy/lingbot_vla_v2_policy.py
     └── experiment/robotwin/
         ├── start_robotwin_infer_and_eval.sh  # 评测主 launcher(推理服务 + 仿真队列调度)
-        ├── eval_policy_client_lingbotvla.py  # 客户端源文件(launcher 复制到 RoboTwin/script/)
-        └── shards/                 # 本次全量评测使用的分片 launcher(A/B/C1-C5)
+        └── eval_policy_client_lingbotvla.py  # 客户端源文件(launcher 复制到 RoboTwin/script/)
 
 03_模型权重/
 ├── checkpoint/                    # 本次提交权重 hf_ckpt_final_equiv10000(12G,含 SHA-256)
@@ -260,7 +259,9 @@ bash scripts/eval.sh --model <ckpt> --tasks 1 --gpus 1 --per-gpu 1 --video \
 - N 个推理服务常驻(端口 9330+),仿真任务完成后立刻从队列取下一个任务复用该槽,任务不重叠、槽位不空转;
 - 任务失败自动重试(最多 3 次),连续 3 次失败记为 skipped 并在 `stats.txt` 中显式标注;
 - 队列尾部自适应关闭空闲推理服务;
-- `src/experiment/robotwin/shards/` 是本次把 50 任务拆成多组、多卡并行评测时用的分片副本(仅改 `task_list_all` 与 GPU 偏移/起始端口,评测逻辑完全相同)。
+- 本次全量评测曾把 50 任务拆成多组、用分片 launcher 并行跑（仅改 `task_list_all` 与 GPU 偏移/起始端口，
+  评测逻辑完全相同）。分片副本属于一次性调度产物，**未保留在仓库当前树**（可在 git 历史中查到）；
+  仓库只保留主 launcher，用 `--tasks / --gpus / --per-gpu` 即可覆盖同样的评测能力。
 
 ## 6. 合规性自查
 

@@ -1,5 +1,9 @@
 # 复现与调优说明
 
+> **仓库路径说明**：本文中的 `02_代码材料/`、`03_模型权重/` 是竞赛提交包的目录布局。
+> 对应到 GitHub 仓库：训练/推理代码在 `ours/`，复现脚本在根目录 `scripts/`，
+> 最终权重放在 `assets/models/hf_ckpt_final_equiv10000`。映射见 [README.md](README.md)。
+
 ## 1. 基础信息
 
 - **团队名称**：【请替换为实际团队名称】
@@ -89,7 +93,7 @@
   | 并发槽位 | 6 卡 × 2 副本/卡 = 12 槽(48GB 卡 bf16 每副本约 18GB,3 副本会 OOM) |
   | seed | 评测客户端按 `100000 + episode 序号` 生成,单 setting 内每个任务 100 局互不重复 |
   | 每任务次数 | **100 次**(`script/eval_policy_client_lingbotvla.py` 中 `test_num = 100`) |
-  | 视频 | 关闭(`--no_video`,仅影响耗时不影响判定) |
+  | 视频 | 全量评测关闭(`--no_video`)；示例回放已用 `--video` 单独录制，见 `../01_评测结果/videos/` |
   | 实测吞吐 | clean 5000 局 8.9 小时;randomized 5000 局 7.3 小时(约 11-13 局/分) |
 
   > **精度口径说明**:本次自测成绩为 **BF16 推理**。开环 MAE 上 BF16 与 FP32 的差异为 1.9%(0.03565 vs 0.0350,在噪声内),但闭环成功率的 BF16/FP32 差异本次未单独测量;若官方复测采用 FP32,成功率可能与自测值存在差异,特此声明以便评委复现时对齐口径。
@@ -102,6 +106,17 @@
 | demo_randomized | 50 | 5000 | 1655 | **33.1%** |
 
 逐任务 attempts/successes 见 `../01_评测结果/results.json`;原始逐 episode 日志位置见 §6。
+
+可视化与回放（均在同一目录）：
+
+| 素材 | 文件 |
+|---|---|
+| 总览面板（总分 / 逐任务 / 退化分析） | `../01_评测结果/eval_results_dashboard.png` |
+| 50 任务 × 2 setting 热力图 | `../01_评测结果/eval_results_heatmap.png` |
+| 逐任务柱状图 | `../01_评测结果/eval_results_summary.png` |
+| 逐任务展开动画 | `../01_评测结果/eval_results_animation.gif` |
+| 评测实拍回放（adjust_bottle，3 局并排） | `../01_评测结果/videos/adjust_bottle_success_montage.gif` |
+| 单局回放（MP4 / GIF） | `../01_评测结果/videos/adjust_bottle_episode0.{mp4,gif}` |
 
 ## 4. 代码改动说明
 

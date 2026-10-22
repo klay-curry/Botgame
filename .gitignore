@@ -18,9 +18,10 @@
 *.hdf5
 *.zip
 *.mp4
+!docs/submission/2026-10-21/01_评测结果/videos/*.mp4
 !docs/必读_模板和目录要求.zip
 
-# ===== 外部官方仓库（scripts/setup_repos.sh 克隆，不直接入库）=====
+# ===== 外部官方仓库（scripts/setup_sim_repo.sh 克隆，不直接入库）=====
 lingbot-vla-v2/
 RoboTwin/
 
@@ -39,6 +40,7 @@ venv/
 __MACOSX/
 Thumbs.db
 *.log
+/ours/log.txt
 
 # ===== 密钥与凭据（绝不入仓；轮换指引见 docs/security/secret-rotation.md）=====
 .env

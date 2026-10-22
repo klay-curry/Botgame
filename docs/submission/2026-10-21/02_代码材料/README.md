@@ -1,5 +1,10 @@
 # RoboTwin 2.0 Aloha-AgileX 50 任务 — 提交代码材料
 
+> **路径说明**：本目录是竞赛提交包快照，下文出现的 `src/`、`configs/`、`03_模型权重/`
+> 是提交包内的布局。在 GitHub 仓库中，训练/推理实现在 `ours/`，复现脚本在根目录
+> `scripts/`，最终权重放在 `assets/models/hf_ckpt_final_equiv10000`。
+> 完整映射见 [../README.md](../README.md)。
+
 本目录提供从官方预训练权重 `lingbot-vla-v2-6b` 出发,在 **RoboTwin 2.0 Aloha-AgileX 50 个任务 clean 数据(每任务 50 条)** 上完成训练与调优、并按官方协议评测的全部代码材料。
 
 评测成绩:**demo_clean 56.6%(2829/5000)**、**demo_randomized 33.1%(1655/5000)**,两个 setting 均为 50 任务 × 每任务 100 次,0 跳过。
@@ -7,7 +12,9 @@
 ![评测结果汇总](../01_评测结果/eval_results_summary.png)
 
 > 动图版:`../01_评测结果/eval_results_animation.gif`(逐任务成功率展开动画);
-> 生成脚本 `scripts/make_results_gif.py`(仅依赖 matplotlib,不需要 GPU)。
+> 总览面板 `eval_results_dashboard.png`、热力图 `eval_results_heatmap.png`、回放视频 `videos/`;
+> 生成脚本：提交包内 `scripts/make_results_gif.py`，GitHub 仓库中为根目录同名脚本
+> (仅依赖 matplotlib,不需要 GPU)。
 
 ---
 
@@ -61,7 +68,7 @@ bash setup_sim_repo.sh                        # 克隆官方 RoboTwin@13c3c47 + 
 2. **配方对齐官方基线**:AdamW / lr 5e-5 恒定 / warmup 3% / BF16 / global 96 / image_augment,步数从 6600 增到等效 10000;
 3. **全量微调单权重**:未用 LoRA/DoRA,未外挂任何 vision/depth 模块,未做结构改动 → 提交的是一份可直接加载的全量权重。
 
-**瓶颈定位(randomized 降幅分解)**:抓取/倾倒类任务降幅小(−8~−15pt),**依赖视觉定位/物体辨认的任务降幅大(−30~−57pt)** → 下一轮应优先攻视觉鲁棒性,而非继续堆动作侧步数。详见 `../04_复现与调优说明/reproduction_report.md` §7。
+**瓶颈定位(randomized 降幅分解)**:抓取/倾倒类任务降幅小(−8~−15pt),**依赖视觉定位/物体辨认的任务降幅大(−30~−57pt)** → 下一轮应优先攻视觉鲁棒性,而非继续堆动作侧步数。详见 `../reproduction_report.md` §7。
 
 ---
 
@@ -132,15 +139,15 @@ bash setup_sim_repo.sh                        # 克隆官方 RoboTwin@13c3c47 + 
 
 ## 3. 资源获取(权重 / tokenizer / 数据)
 
-提交包内的 `../03_模型权重/download_assets.sh` 负责拉取全部外部资源,**支持两种模式**:
+仓库根目录的 `scripts/download_assets.sh`（提交包内为 `03_模型权重/download_assets.sh`）
+负责拉取全部外部资源：
 
 ```bash
-# 模式 B:本地没有 → 脚本自动拉取
-bash ../03_模型权重/download_assets.sh all      # 官方基座 + tokenizer + 训练数据 + 团队中间权重
-bash ../03_模型权重/download_assets.sh base     # 只拉官方基座 lingbot-vla-v2-6b
-bash ../03_模型权重/download_assets.sh tokenizer# 只拉 Qwen3-VL-4B-Instruct
-bash ../03_模型权重/download_assets.sh data     # 只拉训练数据(官方 demo_clean → LeRobot v3.0)
-bash ../03_模型权重/download_assets.sh team     # 只拉团队中间权重(step6600 等)
+bash scripts/download_assets.sh all              # 官方基座 + tokenizer + 训练数据 + 团队中间权重
+bash scripts/download_assets.sh base             # 只拉官方基座 lingbot-vla-v2-6b
+bash scripts/download_assets.sh tokenizer        # 只拉 Qwen3-VL-4B-Instruct
+bash scripts/download_assets.sh data             # 只拉训练数据(官方 demo_clean → LeRobot v3.0)
+bash scripts/download_assets.sh team             # 只拉团队中间权重(默认 step6600)
 ```
 拉取源(全部为 ModelScope 官方/团队公开仓):
 | 资源 | 仓库 | 用途 |
@@ -152,13 +159,14 @@ bash ../03_模型权重/download_assets.sh team     # 只拉团队中间权重(s
 
 默认落地目录(可用 `DEST_ROOT` 覆盖):`assets/models/lingbot-vla-v2-6b`、`assets/models/Qwen3-VL-4B-Instruct`、`assets/data/robotwin_official_joint_v30`、`assets/models/radeon_ckpt`。
 
-> **本次提交的最终权重(`hf_ckpt_final_equiv10000`)已直接包含在 `../03_模型权重/checkpoint/` 内,无需下载。**
+> **最终权重(`hf_ckpt_final_equiv10000`)在提交包内为 `03_模型权重/checkpoint/`；
+> GitHub 仓库中解压到 `assets/models/hf_ckpt_final_equiv10000`，不进入 git。**
 > `team` 段仅在"想从头复现训练"时才需要(它提供等效 6600 步热启动点)。
 
-RoboTwin 仿真仓不随包分发(官方 assets 约 16G),用 `setup_sim_repo.sh` 自动克隆官方仓并叠加本项目增量文件:
+RoboTwin 仿真仓不随包分发(官方 assets 约 16G),用 `scripts/setup_sim_repo.sh` 克隆官方仓:
 ```bash
-bash setup_sim_repo.sh                 # 克隆官方 RoboTwin @13c3c47 → ../src/RoboTwin,并叠加增量文件
-cd ../src/RoboTwin && bash script/_install.sh && bash script/_download_assets.sh
+bash scripts/setup_sim_repo.sh                 # 克隆官方 RoboTwin @13c3c47 → RoboTwin/
+cd RoboTwin && bash script/_install.sh && bash script/_download_assets.sh && cd ..
 ```
 
 ## 4. 一键训练
@@ -209,9 +217,9 @@ bash eval.sh --setting demo_randomized --tasks 50
 - `eval.sh` 内部调用 `src/experiment/robotwin/start_robotwin_infer_and_eval.sh`,按 GPU 数启动常驻推理服务(websocket),仿真侧任务排队复用空闲槽位。
 - 本次正式成绩使用 **6 卡 × 2 副本/卡 = 12 并发槽**,bf16 推理。
 - 结果目录:`<output_base>/_<setting>_<时间戳>/`,内含 `stats.txt`(汇总)、`eval_logs/<task>.log`(逐 episode 原始日志)、`inference_logs/`。
-- 由原始日志生成官方 `results.json`:
+- 由原始日志生成官方 `results.json`（GitHub 仓库中脚本在根目录 `scripts/`）：
   ```bash
-  python3 src/gen_results_json.py   # 自动读取各 run 的 eval_logs,禁止手填
+  python3 scripts/gen_results_json.py   # 自动读取各 run 的 eval_logs,禁止手填
   ```
 
 ### 5.1 录制回放视频(实拍 rollout)
@@ -220,14 +228,14 @@ bash eval.sh --setting demo_randomized --tasks 50
 
 ```bash
 # 单任务录像(推荐:1 卡 1 槽,便于观察)
-bash eval.sh --model <ckpt> --tasks 1 --gpus 1 --per-gpu 1 --video \
-             --setting demo_clean --out ./video_out
+bash scripts/eval.sh --model <ckpt> --tasks 1 --gpus 1 --per-gpu 1 --video \
+                     --setting demo_clean --out ./video_out
 ```
 - 每个 episode 会存一个 mp4,位于 `<output_base>/_<setting>_<时间戳>/eval_results/<task>/`。
 - 录像会明显拖慢仿真(额外渲染),建议只对少量任务开;全量评测保持默认关闭。
 - 由结果数据制作的结果动图/静态图(不需要 GPU):
   ```bash
-  python3 scripts/make_results_gif.py <results.json> <输出目录>
+  python3 ../scripts/make_results_gif.py <results.json> <输出目录>
   # → eval_results_animation.gif, eval_results_summary.png
   ```
 
@@ -259,7 +267,7 @@ bash eval.sh --model <ckpt> --tasks 1 --gpus 1 --per-gpu 1 --video \
 | 赛事红线 | 本次提交 |
 |---|---|
 | 起点必须是 `lingbot-vla-v2-6b` | ✅ 全部权重由该底座初始化后训练 |
-| 训练数据仅用 RoboTwin 2.0 Aloha-AgileX 50 任务 clean,每任务 50 条 | ✅ 50 任务 × 50 = 2500 eps / 549,787 frames,逐任务审计通过(见 `04_复现与调优说明/reproduction_report.md`) |
+| 训练数据仅用 RoboTwin 2.0 Aloha-AgileX 50 任务 clean,每任务 50 条 | ✅ 50 任务 × 50 = 2500 eps / 549,787 frames,逐任务审计通过(见 `../reproduction_report.md`) |
 | 禁止 randomized 数据参与训练 | ✅ 训练清单只有 clean;randomized 仅用于评测 |
 | 禁止外部数据 | ✅ 仅用官方 RoboTwin 2.0 demo_clean 转 LeRobot v3.0 |
 | 禁止 RL / 仿真 rollout / 重渲染观测 / reward 筛选等造数据手段 | ✅ 未使用,未生成任何新轨迹 |
@@ -269,4 +277,4 @@ bash eval.sh --model <ckpt> --tasks 1 --gpus 1 --per-gpu 1 --video \
 
 ## 7. 结果
 
-见 `../01_评测结果/results.json`(官方模板)与 `../04_复现与调优说明/reproduction_report.md`。
+见 `../01_评测结果/results.json`(官方模板)与 `../reproduction_report.md`。

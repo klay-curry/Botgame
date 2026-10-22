@@ -37,6 +37,22 @@
 | [episode 4 GIF](docs/submission/2026-10-21/01_评测结果/videos/adjust_bottle_episode4.gif) | 单局完整回放 |
 | [三局并排 GIF](docs/submission/2026-10-21/01_评测结果/videos/adjust_bottle_success_montage.gif) / [MP4](docs/submission/2026-10-21/01_评测结果/videos/adjust_bottle_success_montage.mp4) | 成功片段合集 |
 
+### 失败案例：clean 成功 vs randomized 失败
+
+同任务 `handover_mic` 的对照：全量评测中该任务 clean 80% → randomized 28%。
+左边是 `demo_clean` 下成功，右边两列是 `demo_randomized`
+下两次失败（均为评测器判定）。randomized 的随机背景/纹理/光照明显干扰了视觉定位，
+机器人反复移动但没有完成麦克风交接。
+
+![handover_mic clean vs randomized](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_clean_vs_randomized.gif)
+
+| 素材 | 说明 |
+|---|---|
+| [clean success GIF](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_clean_episode0_success.gif) / [MP4](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_clean_episode0_success.mp4) | clean 成功回放 |
+| [randomized failure ep1 GIF](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_randomized_episode1_failure.gif) / [MP4](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_randomized_episode1_failure.mp4) | randomized 失败回放 |
+| [randomized failure ep3 GIF](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_randomized_episode3_failure.gif) / [MP4](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_randomized_episode3_failure.mp4) | randomized 失败回放 |
+| [三列对照 GIF](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_clean_vs_randomized.gif) / [MP4](docs/submission/2026-10-21/01_评测结果/videos/handover_mic_clean_vs_randomized.mp4) | clean 成功 + 两次 randomized 失败并排 |
+
 录制方式见 `scripts/eval.sh --video`（正式全量评测默认关闭录像以提速）。
 
 ## 关键结论

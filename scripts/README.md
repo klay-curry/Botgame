@@ -48,7 +48,8 @@ bash scripts/eval.sh --model assets/models/hf_ckpt_final_equiv10000 \
 # 视频在 <output>/_0k_demo_clean_<时间戳>/eval_results/<task>/episodeN_success.mp4
 ```
 
-仓库内示例素材：`docs/submission/2026-10-21/01_评测结果/videos/`（adjust_bottle 成功回放）。
+仓库内示例素材：`docs/submission/2026-10-21/01_评测结果/videos/`（adjust_bottle 成功回放；
+handover_mic clean 成功 vs randomized 失败对照）。
 
 ## 资源与路径约定
 

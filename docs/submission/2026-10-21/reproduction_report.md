@@ -117,6 +117,8 @@
 | 逐任务展开动画 | `../01_评测结果/eval_results_animation.gif` |
 | 评测实拍回放（adjust_bottle，3 局并排） | `../01_评测结果/videos/adjust_bottle_success_montage.gif` |
 | 单局回放（MP4 / GIF） | `../01_评测结果/videos/adjust_bottle_episode0.{mp4,gif}` |
+| clean 成功 vs randomized 失败（handover_mic，三列对照） | `../01_评测结果/videos/handover_mic_clean_vs_randomized.gif` |
+| randomized 失败单局（handover_mic ep1/ep3） | `../01_评测结果/videos/handover_mic_randomized_episode{1,3}_failure.{mp4,gif}` |
 
 ## 4. 代码改动说明
 

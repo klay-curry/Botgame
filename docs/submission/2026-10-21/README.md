@@ -24,7 +24,7 @@
 
 | 目录 | 内容 |
 |---|---|
-| `01_评测结果/` | `results.json`、逐任务审计 CSV、汇总 txt、dashboard / heatmap / summary / GIF、`videos/` 回放 |
+| `01_评测结果/` | `results.json`、逐任务审计 CSV、汇总 txt、dashboard / heatmap / summary / GIF、`videos/` 回放（含 clean 成功与 randomized 失败对照） |
 | `02_代码材料/` | 提交包代码说明、一键 train/eval、仿真仓准备脚本 |
 | `scripts/` | 提交包内使用的资源拉取 / 结果生成 / 作图脚本 |
 | `reproduction_report.md` | 复现与调优说明（原 `04_复现与调优说明/` 的内容） |

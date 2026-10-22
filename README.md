@@ -3,6 +3,9 @@
 基于 **LingBot-VLA 2.0（6B）** 在 **RoboTwin 2.0 Aloha-AgileX 50 任务**上完成全量微调，
 按官方协议跑了两个 setting 的全量闭环评测（每 setting 50 任务 × 100 局）。
 
+> 个人项目：训练、评测、文档与提交均由一名维护者完成；未对官方模型/代码做算法层面的改进，
+> 提交的是按官方配方微调后的全量权重。
+
 ## 最终成绩
 
 | setting | 任务数 | 局数 | 成功 | 成功率 |
@@ -86,7 +89,6 @@ python3 scripts/make_results_gif.py output/eval/results.json output/eval
 │   ├── README.md              # 文档索引
 │   ├── experiments/           # 实验记录（含最终提交评测）
 │   ├── submission/2026-10-21/ # 竞赛提交包快照：结果、图表、回放、代码材料说明
-│   ├── modules/               # 模块化技术方案与分工
 │   ├── handover/              # 开发期交接日志（过程记录）
 │   ├── plan.md                # 原始技术方案
 │   └── work.md / Dingnews.md  # 赛题规则与官方答疑
